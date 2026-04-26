@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Homeopathy Master System</title>
+
+<style>
+body{
+font-family:Arial;
+padding:20px;
+direction:rtl;
+background:#f5f7fa;
+}
+
+h1,h2{
+text-align:center;
+}
+
+select,button{
+padding:10px;
+font-size:16px;
+margin:10px 0;
+width:100%;
+max-width:400px;
+display:block;
+margin-right:auto;
+margin-left:auto;
+}
+
+#symptoms{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:8px;
+margin-top:15px;
+}
+
+.box{
+background:white;
+border:1px solid #ccc;
+padding:8px;
+border-radius:8px;
+font-size:14px;
+}
+
+#result{
+margin-top:20px;
+}
+
+.card{
+background:white;
+padding:12px;
+border-radius:10px;
+margin-bottom:10px;
+box-shadow:0 2px 6px rgba(0,0,0,.08);
+}
+
+@media(max-width:700px){
+#symptoms{grid-template-columns:repeat(2,1fr);}
+}
+</style>
+</head>
+
+<body>
+
+<h1>🏥 Homeopathy Master System</h1>
+
+<select id="disease" onchange="loadDisease()">
+<option value="">بیماری منتخب کریں</option>
+<option value="fever">بخار</option>
+<option value="acidity">تیزابیت</option>
+</select>
+
+<div id="symptoms"></div>
+
+<button onclick="analyze()">Analyze کریں</button>
+
+<div id="result"></div>
+
+<script>
+
+const diseases = {
+
+fever:{
+symptoms:[
+"تیز بخار","اچانک بخار","سر درد","گرمی","بے چینی","ڈر","پیاس زیادہ","کمزوری"
+],
+remedies:[
+{name:"Aconite",sym:[{s:"اچانک بخار",w:3},{s:"ڈر",w:3},{s:"بے چینی",w:3}]},
+{name:"Belladonna",sym:[{s:"تیز بخار",w:3},{s:"سر درد",w:3},{s:"گرمی",w:3}]},
+{name:"Gelsemium",sym:[{s:"کمزوری",w:3}]}
+]
+},
+
+acidity:{
+symptoms:[
+"تیزابیت","گیس","قبض","کھٹی ڈکار","جلن","چڑچڑا پن","پیٹ پھولنا"
+],
+remedies:[
+{name:"Nux Vomica",sym:[{s:"تیزابیت",w:3},{s:"قبض",w:3},{s:"چڑچڑا پن",w:3}]},
+{name:"Carbo Veg",sym:[{s:"گیس",w:3},{s:"پیٹ پھولنا",w:3}]},
+{name:"Robinia",sym:[{s:"کھٹی ڈکار",w:3},{s:"جلن",w:3}]}
+]
+}
+
+};
+
+function loadDisease(){
+
+let d=document.getElementById("disease").value;
+let box=document.getElementById("symptoms");
+box.innerHTML="";
+document.getElementById("result").innerHTML="";
+
+if(!d)return;
+
+diseases[d].symptoms.forEach(s=>{
+box.innerHTML+=`<div class="box"><input type="checkbox" value="${s}"> ${s}</div>`;
+});
+
+}
+
+function analyze(){
+
+let d=document.getElementById("disease").value;
+if(!d)return;
+
+let checked=document.querySelectorAll('#symptoms input:checked');
+let selected=[];
+
+checked.forEach(c=>selected.push(c.value));
+
+let scores=[];
+
+diseases[d].remedies.forEach(r=>{
+
+let total=0;
+let reasons=[];
+
+r.sym.forEach(x=>{
+if(selected.includes(x.s)){
+total+=x.w;
+reasons.push(x);
+}
+});
+
+if(total>0){
+reasons.sort((a,b)=>b.w-a.w);
+scores.push({name:r.name,score:total,reasons:reasons});
+}
+
+});
+
+scores.sort((a,b)=>b.score-a.score);
+
+let html="<h2>Result</h2>";
+
+if(scores.length==0){
+html+="کوئی remedy نہیں ملی";
+}else{
+
+let max=scores[0].score;
+
+scores.forEach(r=>{
+
+let p=Math.round((r.score/max)*100);
+
+html+=`<div class="card">
+<b>${r.name} — ${p}%</b><br>`;
+
+r.reasons.slice(0,3).forEach(z=>{
+html+=`✔ ${z.s}<br>`;
+});
+
+html+=`</div>`;
+
+});
+
+}
+
+document.getElementById("result").innerHTML=html;
+
+}
+
+</script>
+
+</body>
+</html>
