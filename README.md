@@ -1,2 +1,2 @@
-# AI-Unani.html
+# AI-Unani
 my first website
